@@ -399,13 +399,13 @@ public class MandelbrotViewGestureTest {
         assertFalse(MandelbrotView.skipAdaptiveUiPublish(null));
     }
 
-    /** Issue #9: sample count matches progressive 8→4→2→1 grid visits. */
+    /** Progressive sampling starts from the largest power of two below the shorter edge. */
     @Test
     public void progressiveSampleCount_matchesNestedLoops() {
         int w = 1080;
-        int h = 1920;
+        int h = 768;
         int expected = 0;
-        for (int step = 8; step > 0; step /= 2) {
+        for (int step = MandelbrotView.progressiveStartStep(w, h); step > 0; step /= 2) {
             for (int y = 0; y < h; y += step) {
                 for (int x = 0; x < w; x += step) {
                     expected++;
@@ -414,5 +414,13 @@ public class MandelbrotViewGestureTest {
         }
         assertEquals(expected, MandelbrotView.progressiveSampleCount(w, h));
         assertEquals(0, MandelbrotView.progressiveSampleCount(0, h));
+    }
+
+    @Test
+    public void progressiveStartStep_isLargestPowerOfTwoBelowShorterEdge() {
+        assertEquals(512, MandelbrotView.progressiveStartStep(1080, 768));
+        assertEquals(256, MandelbrotView.progressiveStartStep(600, 400));
+        assertEquals(4, MandelbrotView.progressiveStartStep(8, 8));
+        assertEquals(1, MandelbrotView.progressiveStartStep(1, 1));
     }
 }

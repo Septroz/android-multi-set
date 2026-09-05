@@ -88,8 +88,9 @@ does not change iteration settings.
 
 While a progressive render is running after you lift your finger (or after
 zoom / reset / palette change), a thin progress bar at the top fills in
-proportion to completed samples (steps 8→4→2→1, weighted by work). In
-**Adaptive** mode, after step 1 the bar switches to an indeterminate
+proportion to completed samples from a coarse power-of-two grid down to
+individual pixels, weighted by work. In **Adaptive** mode, after the
+individual-pixel pass the bar switches to an indeterminate
 animation while border refine runs; the fractal image may update every
 ~4000 border pixels or ~250 ms as the refine progresses. It disappears when
 the full-resolution frame is ready or when a new gesture cancels the render.

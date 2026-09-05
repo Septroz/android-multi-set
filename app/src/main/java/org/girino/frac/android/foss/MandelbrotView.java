@@ -44,7 +44,7 @@ public class MandelbrotView extends View {
     public interface RenderBusyListener {
         void onRenderBusy(boolean busy);
 
-        /** Completed fractal samples vs total across steps 8→4→2→1. */
+        /** Completed fractal samples vs total across power-of-two steps down to 1. */
         void onRenderProgress(int completed, int total);
 
         /**
@@ -291,20 +291,26 @@ public class MandelbrotView extends View {
     }
 
     /**
-     * Total operator samples for progressive steps 8→4→2→1 (matches the
-     * render loops). Used to weight the determinate progress bar.
+     * Total operator samples for progressive power-of-two steps down to 1
+     * (matches the render loops). Used to weight the determinate progress bar.
      */
     static int progressiveSampleCount(int renderWidth, int renderHeight) {
         if (renderWidth <= 0 || renderHeight <= 0) {
             return 0;
         }
         int total = 0;
-        for (int step = 8; step > 0; step /= 2) {
+        for (int step = progressiveStartStep(renderWidth, renderHeight); step > 0; step /= 2) {
             int cols = (renderWidth - 1) / step + 1;
             int rows = (renderHeight - 1) / step + 1;
             total += cols * rows;
         }
         return total;
+    }
+
+    /** Largest power of two strictly smaller than the shorter screen edge. */
+    static int progressiveStartStep(int renderWidth, int renderHeight) {
+        int shorterEdge = Math.min(renderWidth, renderHeight);
+        return Math.max(1, Integer.highestOneBit(Math.max(0, shorterEdge - 1)));
     }
 
     private void postRenderProgress(int generation, int completed, int total) {
@@ -405,7 +411,9 @@ public class MandelbrotView extends View {
         AtomicBoolean stepEscapes = adaptive ? new AtomicBoolean(false) : null;
         AtomicBoolean adaptiveColoredEscape = adaptive ? new AtomicBoolean(false) : null;
 
-        for (int step = 8; step > 0; step /= 2) {
+        for (int step = progressiveStartStep(renderWidth, renderHeight);
+                step > 0;
+                step /= 2) {
             boolean finished = ParallelStepRenderer.fillStep(
                     pixels,
                     renderWidth,

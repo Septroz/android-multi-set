@@ -28,11 +28,13 @@ public class IterationSettingsActivity extends AppCompatActivity {
     private TextInputLayout baseLayout;
     private TextInputLayout multiplierLayout;
     private TextInputLayout roundsLayout;
+    private TextInputLayout minRoundsLayout;
     private TextInputLayout capLayout;
     private TextInputEditText fixedValue;
     private TextInputEditText baseValue;
     private TextInputEditText multiplierValue;
     private TextInputEditText roundsValue;
+    private TextInputEditText minRoundsValue;
     private TextInputEditText capValue;
     private boolean disableAdaptive;
 
@@ -53,11 +55,13 @@ public class IterationSettingsActivity extends AppCompatActivity {
         baseLayout = findViewById(R.id.iteration_base_layout);
         multiplierLayout = findViewById(R.id.iteration_multiplier_layout);
         roundsLayout = findViewById(R.id.iteration_rounds_layout);
+        minRoundsLayout = findViewById(R.id.iteration_min_rounds_layout);
         capLayout = findViewById(R.id.iteration_cap_layout);
         fixedValue = findViewById(R.id.iteration_fixed_value);
         baseValue = findViewById(R.id.iteration_base_value);
         multiplierValue = findViewById(R.id.iteration_multiplier_value);
         roundsValue = findViewById(R.id.iteration_rounds_value);
+        minRoundsValue = findViewById(R.id.iteration_min_rounds_value);
         capValue = findViewById(R.id.iteration_cap_value);
         MaterialButton save = findViewById(R.id.iteration_save);
         MaterialButton resetDefaults = findViewById(R.id.iteration_reset_defaults);
@@ -67,6 +71,7 @@ public class IterationSettingsActivity extends AppCompatActivity {
             adaptiveRadio.setVisibility(View.GONE);
             adaptiveSection.setVisibility(View.GONE);
             roundsLayout.setVisibility(View.GONE);
+            minRoundsLayout.setVisibility(View.GONE);
             capLayout.setVisibility(View.GONE);
         }
 
@@ -110,6 +115,7 @@ public class IterationSettingsActivity extends AppCompatActivity {
         baseValue.setText(String.valueOf(settings.baseMax));
         multiplierValue.setText(formatMultiplier(settings.multiplier));
         roundsValue.setText(String.valueOf(settings.maxRounds));
+        minRoundsValue.setText(String.valueOf(settings.minRounds));
         capValue.setText(String.valueOf(settings.absoluteCap));
     }
 
@@ -135,10 +141,13 @@ public class IterationSettingsActivity extends AppCompatActivity {
 
         roundsLayout.setEnabled(adaptive);
         roundsValue.setEnabled(adaptive);
+        minRoundsLayout.setEnabled(adaptive);
+        minRoundsValue.setEnabled(adaptive);
         capLayout.setEnabled(adaptive);
         capValue.setEnabled(adaptive);
         float adaptiveAlpha = adaptive ? 1f : 0.45f;
         roundsLayout.setAlpha(adaptiveAlpha);
+        minRoundsLayout.setAlpha(adaptiveAlpha);
         capLayout.setAlpha(adaptiveAlpha);
     }
 
@@ -159,9 +168,16 @@ public class IterationSettingsActivity extends AppCompatActivity {
         Integer base = parseInt(baseValue, IterationSettings.MIN_ITER, IterationSettings.MAX_ITER_CAP);
         Double multiplier = parseDouble(multiplierValue);
         Integer rounds = parseInt(roundsValue, IterationSettings.MIN_ROUNDS, IterationSettings.MAX_ROUNDS);
+        Integer minRounds = parseInt(
+                minRoundsValue, IterationSettings.MIN_ROUNDS, IterationSettings.MAX_ROUNDS);
         Integer cap = parseInt(capValue, IterationSettings.MIN_ITER, IterationSettings.MAX_ABSOLUTE_CAP);
-        if (fixed == null || base == null || multiplier == null || rounds == null || cap == null) {
+        if (fixed == null || base == null || multiplier == null || rounds == null
+                || minRounds == null || cap == null) {
             Toast.makeText(this, R.string.iteration_invalid, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (minRounds > rounds) {
+            Toast.makeText(this, R.string.iteration_invalid_min_rounds, Toast.LENGTH_SHORT).show();
             return;
         }
         if (multiplier < IterationSettings.MIN_MULTIPLIER
@@ -175,7 +191,7 @@ public class IterationSettingsActivity extends AppCompatActivity {
         }
 
         IterationSettings settings = new IterationSettings(
-                mode, fixed, base, multiplier, rounds, cap);
+                mode, fixed, base, multiplier, minRounds, rounds, cap);
         IterationSettingsStore.save(this, settings);
         setResult(RESULT_OK);
         finish();

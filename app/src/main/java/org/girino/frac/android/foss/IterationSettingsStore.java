@@ -12,6 +12,7 @@ public final class IterationSettingsStore {
     private static final String KEY_BASE = "base_max";
     private static final String KEY_MULTIPLIER = "multiplier";
     private static final String KEY_MAX_ROUNDS = "max_rounds";
+    private static final String KEY_MIN_ROUNDS = "min_rounds";
     private static final String KEY_ABSOLUTE_CAP = "absolute_cap";
 
     private IterationSettingsStore() {
@@ -26,8 +27,10 @@ public final class IterationSettingsStore {
                 KEY_MULTIPLIER,
                 (float) IterationSettings.DEFAULT_MULTIPLIER);
         int maxRounds = prefs.getInt(KEY_MAX_ROUNDS, IterationSettings.DEFAULT_MAX_ROUNDS);
+        int minRounds = prefs.getInt(KEY_MIN_ROUNDS, IterationSettings.DEFAULT_MIN_ROUNDS);
         int absoluteCap = prefs.getInt(KEY_ABSOLUTE_CAP, IterationSettings.DEFAULT_ABSOLUTE_CAP);
-        return new IterationSettings(mode, fixed, base, multiplier, maxRounds, absoluteCap);
+        return new IterationSettings(
+                mode, fixed, base, multiplier, minRounds, maxRounds, absoluteCap);
     }
 
     public static void save(Context context, IterationSettings settings) {
@@ -40,6 +43,7 @@ public final class IterationSettingsStore {
                 .putInt(KEY_FIXED, settings.fixedMax)
                 .putInt(KEY_BASE, settings.baseMax)
                 .putFloat(KEY_MULTIPLIER, (float) settings.multiplier)
+                .putInt(KEY_MIN_ROUNDS, settings.minRounds)
                 .putInt(KEY_MAX_ROUNDS, settings.maxRounds)
                 .putInt(KEY_ABSOLUTE_CAP, settings.absoluteCap)
                 .apply();

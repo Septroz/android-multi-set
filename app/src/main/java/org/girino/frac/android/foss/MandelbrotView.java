@@ -530,6 +530,7 @@ public class MandelbrotView extends View {
                     0,
                     null,
                     roundListener,
+                    iterationSettings.minRounds,
                     adaptiveMinStopIter,
                     orbit,
                     previewListener,

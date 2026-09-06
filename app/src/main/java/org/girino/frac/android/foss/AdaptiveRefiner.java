@@ -188,6 +188,60 @@ public final class AdaptiveRefiner {
     }
 
     /**
+     * Refines with a configured minimum number of border-doubling rounds.
+     * Empty rounds still advance the limit until this minimum is reached.
+     */
+    public static int refine(
+            int[] pixels,
+            boolean[] interior,
+            int width,
+            int height,
+            double scale,
+            double centerX,
+            double centerY,
+            FractalOperator[] workerOperators,
+            PaletteProvider palette,
+            boolean smooth,
+            int pass1MaxIter,
+            int maxRounds,
+            int absoluteCap,
+            ExecutorService workers,
+            ParallelStepRenderer.CancelCheck cancel,
+            AtomicInteger doneSamples,
+            int progressTotal,
+            ParallelStepRenderer.ProgressListener progress,
+            RoundListener roundListener,
+            int minRounds,
+            int seedMinStopIter,
+            OrbitState orbit,
+            PreviewListener previewListener,
+            AtomicBoolean coloredEscapeSeen) {
+        int minimumRoundLimit = minimumRoundStopLimit(pass1MaxIter, minRounds, absoluteCap);
+        return refine(
+                pixels, interior, width, height, scale, centerX, centerY,
+                workerOperators, palette, smooth, pass1MaxIter, maxRounds, absoluteCap,
+                workers, cancel, doneSamples, progressTotal, progress, roundListener,
+                Math.max(seedMinStopIter, minimumRoundLimit), orbit, previewListener,
+                coloredEscapeSeen);
+    }
+
+    /** Iteration limit reached after the requested number of doublings. */
+    static int minimumRoundStopLimit(int pass1MaxIter, int minRounds, int absoluteCap) {
+        int limit = Math.max(pass1MaxIter, IterationSettings.MIN_ITER);
+        int cap = Math.max(absoluteCap, limit);
+        int rounds = Math.max(IterationSettings.MIN_ROUNDS, minRounds);
+        for (int round = 0; round < rounds && limit < cap; round++) {
+            limit = limit > IterationSettings.MAX_ABSOLUTE_CAP / 2
+                    ? IterationSettings.MAX_ABSOLUTE_CAP
+                    : limit * 2;
+            if (limit > cap) {
+                limit = cap;
+            }
+        }
+        return limit;
+    }
+
+    /**
      * @param seedMinStopIter minimum iteration limit before an empty border
      *         pass may stop doubling (usually the Adaptive value shown on the
      *         overlay from the previous zoom; 0 if none). Doubling always

@@ -29,6 +29,7 @@ public class IterationSettingsStoreTest {
         assertEquals(IterationSettings.MIN_ITER, s.fixedMax);
         assertEquals(99999, s.baseMax);
         assertEquals(IterationSettings.MIN_MULTIPLIER, s.multiplier, 1e-9);
+        assertEquals(IterationSettings.MIN_ROUNDS, s.minRounds);
         assertEquals(IterationSettings.MIN_ROUNDS, s.maxRounds);
         assertEquals(IterationSettings.MAX_ABSOLUTE_CAP, s.absoluteCap);
     }
@@ -53,8 +54,10 @@ public class IterationSettingsStoreTest {
     public void defaults_includeAdaptiveCaps() {
         IterationSettings d = IterationSettings.defaults();
         assertEquals(IterationSettings.DEFAULT_MAX_ROUNDS, d.maxRounds);
+        assertEquals(IterationSettings.DEFAULT_MIN_ROUNDS, d.minRounds);
         assertEquals(IterationSettings.DEFAULT_ABSOLUTE_CAP, d.absoluteCap);
         assertEquals(18, d.maxRounds);
+        assertEquals(1, d.minRounds);
         assertEquals(1 << 18, d.absoluteCap);
     }
 
@@ -65,6 +68,14 @@ public class IterationSettingsStoreTest {
         assertEquals(64, defaults.fixedMax);
         assertEquals(40, defaults.baseMax);
         assertEquals(1.2, defaults.multiplier, 1e-9);
+    }
+
+    @Test
+    public void constructor_keepsMinimumRoundsAtOrBelowMaximum() {
+        IterationSettings s = new IterationSettings(
+                IterationSettings.Mode.ADAPTIVE, 64, 40, 1.2, 6, 3, 1024);
+        assertEquals(6, s.minRounds);
+        assertEquals(6, s.maxRounds);
     }
 
     @Test

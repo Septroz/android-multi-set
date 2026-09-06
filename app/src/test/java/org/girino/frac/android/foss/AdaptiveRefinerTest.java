@@ -161,6 +161,28 @@ public class AdaptiveRefinerTest {
     }
 
     @Test
+    public void refine_minRounds_climbsAfterEmptyBorderPasses() {
+        int width = 4;
+        int height = 4;
+        int pass1 = 10;
+        int minRounds = 3;
+        boolean[] interior = new boolean[width * height];
+        Arrays.fill(interior, true);
+        int[] pixels = new int[width * height];
+        Arrays.fill(pixels, 0xff000000);
+
+        int reached = AdaptiveRefiner.refine(
+                pixels, interior, width, height, 1e12, 0, 0,
+                new FractalOperator[] {new OptimizedMandelbrotOperator()},
+                new HSBPalette(), false, pass1, 4, 160,
+                workers, null, new AtomicInteger(), width * height, null,
+                null, minRounds, 0, null, null, null);
+
+        assertEquals(80, reached);
+        assertEquals(80, AdaptiveRefiner.minimumRoundStopLimit(pass1, minRounds, 160));
+    }
+
+    @Test
     public void collectBorder_alsoFrame_unionsFrameWithSeam() {
         // Escaped center creates a seam at the four neighbors; alsoFrame
         // adds remaining perimeter interior pixels (first-round / zoom-out).

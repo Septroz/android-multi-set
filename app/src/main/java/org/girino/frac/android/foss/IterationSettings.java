@@ -4,7 +4,7 @@ package org.girino.frac.android.foss;
  * User-chosen escape-time iteration policy (issues #26 / #28).
  * FIXED uses fixedMax for every pixel; SCALE_WITH_ZOOM uses baseMax and
  * multiplier against viewport scale (see IterationPolicy); ADAPTIVE uses
- * fixedMax for pass 1 then border-doubling refinement up to maxRounds /
+ * fixedMax for pass 1 then border-doubling refinement from minRounds up to maxRounds /
  * absoluteCap (see AdaptiveRefiner).
  *
  * SOFT_ITER_WARN (4096) is a UI advisory only; values above it are allowed
@@ -31,6 +31,7 @@ public final class IterationSettings {
     public static final int DEFAULT_BASE_MAX = 40;
     public static final double DEFAULT_MULTIPLIER = 1.2;
     public static final int DEFAULT_MAX_ROUNDS = 18;
+    public static final int DEFAULT_MIN_ROUNDS = 1;
     public static final int DEFAULT_ABSOLUTE_CAP = 1 << 18;
     public static final int MIN_ROUNDS = 1;
     public static final int MAX_ROUNDS = 31;
@@ -41,7 +42,9 @@ public final class IterationSettings {
     public final int fixedMax;
     public final int baseMax;
     public final double multiplier;
-    /** Adaptive: max border-doubling rounds after pass 1. */
+    /** Adaptive: minimum border-doubling rounds after pass 1. */
+    public final int minRounds;
+    /** Adaptive: maximum border-doubling rounds after pass 1. */
     public final int maxRounds;
     /** Adaptive: ceiling for iteration limit across rounds. */
     public final int absoluteCap;
@@ -57,11 +60,23 @@ public final class IterationSettings {
             double multiplier,
             int maxRounds,
             int absoluteCap) {
+        this(mode, fixedMax, baseMax, multiplier, DEFAULT_MIN_ROUNDS, maxRounds, absoluteCap);
+    }
+
+    public IterationSettings(
+            Mode mode,
+            int fixedMax,
+            int baseMax,
+            double multiplier,
+            int minRounds,
+            int maxRounds,
+            int absoluteCap) {
         this.mode = mode != null ? mode : Mode.FIXED;
         this.fixedMax = clampInt(fixedMax, MIN_ITER, MAX_ITER_CAP);
         this.baseMax = clampInt(baseMax, MIN_ITER, MAX_ITER_CAP);
         this.multiplier = clampDouble(multiplier, MIN_MULTIPLIER, MAX_MULTIPLIER);
-        this.maxRounds = clampInt(maxRounds, MIN_ROUNDS, MAX_ROUNDS);
+        this.minRounds = clampInt(minRounds, MIN_ROUNDS, MAX_ROUNDS);
+        this.maxRounds = clampInt(maxRounds, this.minRounds, MAX_ROUNDS);
         this.absoluteCap = clampInt(absoluteCap, MIN_ITER, MAX_ABSOLUTE_CAP);
     }
 
@@ -71,6 +86,7 @@ public final class IterationSettings {
                 DEFAULT_FIXED_MAX,
                 DEFAULT_BASE_MAX,
                 DEFAULT_MULTIPLIER,
+                DEFAULT_MIN_ROUNDS,
                 DEFAULT_MAX_ROUNDS,
                 DEFAULT_ABSOLUTE_CAP);
     }

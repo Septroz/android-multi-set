@@ -38,6 +38,7 @@ public final class FormulaCatalog {
             "Julia Phoenix",
             "Celtic Mandelbrot",
             "Perpendicular Mandelbrot",
+            "Simonbrot",
     };
 
     private FormulaCatalog() {
@@ -76,6 +77,8 @@ public final class FormulaCatalog {
                 return new FourthMandelbrotOperator();
             case 6:
                 return new ShipBarOperator();
+            case 7:
+                return new SimonOperator();
             case PHOENIX_INDEX:
                 return createPhoenix(
                         PhoenixParamsStore.DEFAULT_P_RE, PhoenixParamsStore.DEFAULT_P_IM);

@@ -13,6 +13,7 @@ import org.girino.frac.operators.OptimizedMandelbrotOperator;
 import org.girino.frac.operators.PhoenixOperator;
 import org.girino.frac.operators.PerpendicularMandelbrotOperator;
 import org.girino.frac.operators.ShipBarOperator;
+import org.girino.frac.operators.SimonOperator;
 
 /** Named fractal formulas available in the picker (issues #10 / #13). */
 public final class FormulaCatalog {
